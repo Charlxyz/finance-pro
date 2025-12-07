@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, render_template, flash
 from .extensions import db, login_manager
 from .routes.main import main_bp
 from .routes.auth import auth_bp
@@ -14,5 +14,10 @@ def create_app():
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
     app.register_blueprint(twofa_bp)
+
+    @app.errorhandler(404)
+    def page_not_found(e):
+        flash("La page que vous recherchez n'existe pas.", 'error')
+        return render_template("404.html")
 
     return app
