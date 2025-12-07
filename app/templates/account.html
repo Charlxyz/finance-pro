@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+
+{% block title %}Mon compte - FinancePro{% endblock %}
+
+{% block content %}
+
+<div class="max-w-5xl mx-auto px-4 py-12">
+    <!-- TITRE -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-10">
+        Mon compte utilisateur
+    </h1>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        <!-- COLONNE PROFIL + STATUT DU COMPTE -->
+        <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm">
+            <!-- USER INFO -->
+            <div class="flex flex-col items-center mb-6">
+                <div class="w-24 h-24 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center text-3xl font-bold">
+                    {{ user.initials if user else "U" }}
+                </div>
+
+                <h2 class="text-xl font-semibold text-gray-800 mt-4">
+                    {{ user.name if user else "Utilisateur" }}
+                </h2>
+
+                <p class="text-gray-600 text-sm">
+                    {{ user.email if user else "email@example.com" }}
+                </p>
+            </div>
+
+            <!-- STATUT DU COMPTE -->
+            <div class="mt-6">
+                <p class="text-gray-700 font-semibold mb-2">Statut du compte :</p>
+
+                {% if user and user.active %}
+                    <span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-medium">
+                        Actif
+                    </span>
+                {% else %}
+                    <span class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-sm font-medium">
+                        Inactif
+                    </span>
+                {% endif %}
+            </div>
+
+            <hr class="my-6">
+
+            <!-- BOUTONS DE RÉGLAGES -->
+            <div class="space-y-4">
+
+                <a href="/account/edit"
+                   class="block w-full text-center py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
+                    Modifier mes informations
+                </a>
+
+                <a href="/logout"
+                   class="block w-full text-center py-2 bg-gray-100 text-gray-700 border rounded-lg hover:bg-gray-200 transition">
+                    Déconnexion
+                </a>
+            </div>
+        </div>
+
+        <!-- COLONNE RÉGLAGES UTILISATEUR -->
+        <div class="lg:col-span-2 space-y-10">
+            <!-- REGLAGES -->
+            <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Réglages</h2>
+                <div class="space-y-6">
+                    <!-- Notifications -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-gray-800">Notifications email</p>
+                            <p class="text-gray-600 text-sm">Recevoir les mises à jour de votre compte et du portefeuille.</p>
+                        </div>
+                        <label class="inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only" checked>
+                            <span class="w-12 h-6 bg-gray-300 rounded-full relative transition">
+                                <span class="absolute left-0 top-0 h-6 w-6 bg-white rounded-full shadow transition translate-x-6"></span>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- Sécurité -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-gray-800">Double authentification</p>
+                            <p class="text-gray-600 text-sm">Renforcez la sécurité de votre compte.</p>
+                        </div>
+                        <button onclick="openTwoFAModal()" class="text-indigo-600 hover:underline">Configurer</button>
+                    </div>
+
+                    <!-- Confidentialité -->
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="font-semibold text-gray-800">Confidentialité</p>
+                            <p class="text-gray-600 text-sm">Contrôlez la visibilité de vos données.</p>
+                        </div>
+                        <button onclick="openConfidentialityModal()" class="text-indigo-600 hover:underline">
+                            Gérer
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- REVUE RAPIDE DES COMPTES -->
+            <div class="bg-white p-6 border border-gray-200 rounded-xl shadow-sm">
+                <h2 class="text-2xl font-semibold text-gray-800 mb-6">Revue rapide des comptes</h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+                    <!-- SOLDE -->
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <p class="text-gray-700 font-semibold">Solde actuel</p>
+                        <p class="text-3xl font-bold text-indigo-600 mt-2">
+                            {{ balances.total if balances else "12 450 €" }}
+                        </p>
+                    </div>
+
+                    <!-- REVENUS -->
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <p class="text-gray-700 font-semibold">Revenus du mois</p>
+                        <p class="text-3xl font-bold text-green-600 mt-2">
+                            {{ balances.income if balances else "2 300 €" }}
+                        </p>
+                    </div>
+
+                    <!-- DÉPENSES -->
+                    <div class="bg-gray-50 p-4 rounded-lg border">
+                        <p class="text-gray-700 font-semibold">Dépenses du mois</p>
+                        <p class="text-3xl font-bold text-red-600 mt-2">
+                            {{ balances.expense if balances else "1 260 €" }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CONFIDENTIALITÉ -->
+<div id="confidentiality-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-xl rounded-xl shadow-lg p-6 relative">
+        <!-- Bouton fermer -->
+        <button onclick="closeConfidentialityModal()" 
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">
+            &times;
+        </button>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            Paramètres de confidentialité
+        </h2>
+
+        <p class="text-gray-600 mb-6">
+            Gérez ici tous les paramètres liés à votre vie privée et au traitement de vos données personnelles.
+        </p>
+
+        <div class="space-y-6">
+
+            <!-- Visibilité du profil -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-semibold text-gray-800">Profil visible</p>
+                    <p class="text-gray-600 text-sm">Permettre aux autres utilisateurs de voir votre profil public.</p>
+                </div>
+                <label class="switch cursor-pointer">
+                    <input type="checkbox" id="profileVisibility" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Partage des données -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-semibold text-gray-800">Partage des données anonymisées</p>
+                    <p class="text-gray-600 text-sm">Utilisées uniquement pour améliorer la plateforme.</p>
+                </div>
+                <label class="switch cursor-pointer">
+                    <input type="checkbox" id="dataSharing">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <!-- Publicité -->
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="font-semibold text-gray-800">Publicité ciblée</p>
+                    <p class="text-gray-600 text-sm">Basée sur votre activité sur FinancePro.</p>
+                </div>
+                <label class="switch cursor-pointer">
+                    <input type="checkbox" id="adPersonalization" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <hr>
+
+            <!-- Export données -->
+            <button class="w-full py-3 bg-gray-100 border rounded-lg text-gray-800 hover:bg-gray-200 transition">
+                Télécharger mes données personnelles
+            </button>
+
+            <!-- Suppression compte -->
+            <button class="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                Supprimer définitivement mon compte
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2FA -->
+<div id="twofa-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-lg rounded-xl shadow-lg p-6 relative">
+        <!-- Bouton fermer -->
+        <button onclick="closeTwoFAModal()" 
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">
+            &times;
+        </button>
+
+        <!-- TITRE -->
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            Double authentification (2FA)
+        </h2>
+
+        <!-- DESCRIPTION -->
+        <p class="text-gray-600 mb-6">
+            Activez la sécurité renforcée. Un code à 6 chiffres vous sera envoyé à chaque connexion.
+        </p>
+
+        <!-- ÉTAPE 1 : BOUTON ACTIVER -->
+        <div id="step-activate" class="space-y-6">
+            <button onclick="sendTwoFACode()" 
+                class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                Activer la double authentification
+            </button>
+        </div>
+
+        <!-- ÉTAPE 2 : CHAMP CODE -->
+        <div id="step-verify" class="hidden space-y-6">
+            <p class="text-gray-700">Un code à 6 chiffres vient de vous être envoyé.</p>
+
+            <input id="twofa-code-input" maxlength="6" placeholder="Entrez le code"
+                   class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-600">
+
+            <button onclick="verifyTwoFACode()"
+                class="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
+                Vérifier et activer
+            </button>
+
+            <button onclick="sendTwoFACode()" 
+                class="w-full py-2 text-gray-600 hover:text-gray-800 text-sm">
+                Renvoyer le code
+            </button>
+
+        </div>
+
+        <!-- ÉTAPE 3 : VALIDÉ -->
+        <div id="step-success" class="hidden text-center space-y-4">
+            <p class="text-green-600 font-semibold text-lg">Double authentification activée avec succès !</p>
+            <button onclick="closeTwoFAModal()" 
+                class="px-6 py-2 bg-indigo-600 text-white rounded-lg">
+                Fermer
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/account.js') }}"></script>
+
+{% endblock %}

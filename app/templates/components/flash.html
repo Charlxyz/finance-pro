@@ -1,0 +1,16 @@
+<!-- FLASH POPUP -->
+<div id="flash-container" class="fixed top-6 right-6 space-y-4 z-50"></div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <script>
+            const flashMessages = {{ messages | tojson }};
+        </script>
+    {% else %}
+        <script>
+            const flashMessages = [];
+        </script>
+    {% endif %}
+{% endwith %}
+
+<script src="{{ url_for('static', filename='js/components/flash.js') }}"></script>

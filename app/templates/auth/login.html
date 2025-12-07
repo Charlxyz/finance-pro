@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Connexion - FinancePro{% endblock %}
+
+{% block content %}
+<div class="flex justify-center items-center py-20">
+    <div class="bg-white p-10 rounded-xl shadow-md w-full max-w-md border border-gray-200">
+        
+        <h1 class="text-3xl font-bold text-center text-indigo-600 mb-6">
+            Connexion
+        </h1>
+
+        <!-- FORMULAIRE DE CONNEXION -->
+        <form action="/auth/login" method="POST" class="space-y-5">
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Email</label>
+                <input type="email" name="email" required
+                    class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+
+            <div>
+                <label class="block text-gray-700 font-medium mb-1">Mot de passe</label>
+                <input type="password" name="password" required
+                    class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:outline-none">
+            </div>
+
+            <button type="submit"
+                class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-lg transition">
+                Se connecter
+            </button>
+
+            <p class="text-center text-gray-600 text-sm mt-3">
+                Pas de compte ?
+                <a href="/register" class="text-indigo-600 hover:underline">Créer un compte</a>
+            </p>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

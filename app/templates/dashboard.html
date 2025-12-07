@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - FinancePro{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-800 mb-10">
+        Tableau de bord
+    </h1>
+
+    <!-- GRID DES CARTES -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <!-- SOLDE DU COMPTE -->
+        <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Solde du compte</h2>
+            <p class="text-4xl font-bold text-indigo-600">
+                12 450 €
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Mise à jour aujourd'hui à 09:42
+            </p>
+        </div>
+
+        <!-- INVESTISSEMENTS -->
+        <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Investissements</h2>
+            <p class="text-4xl font-bold text-green-600">
+                32 800 €
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Portefeuille global (actions, crypto, ETF)
+            </p>
+        </div>
+
+        <!-- DERNIÈRES ENTRÉES -->
+        <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Dernières entrées</h2>
+
+            <ul class="space-y-3 mt-3">
+                <li class="flex justify-between text-gray-700">
+                    <span>Virement salaire</span>
+                    <span class="font-semibold text-green-600">+ 2 300 €</span>
+                </li>
+                <li class="flex justify-between text-gray-700">
+                    <span>Cashback banque</span>
+                    <span class="font-semibold text-green-600">+ 14 €</span>
+                </li>
+                <li class="flex justify-between text-gray-700">
+                    <span>Intérêts livret</span>
+                    <span class="font-semibold text-green-600">+ 8 €</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- DERNIÈRES SORTIES -->
+        <div class="bg-white border border-gray-200 shadow-sm rounded-xl p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Dernières sorties</h2>
+
+            <ul class="space-y-3 mt-3">
+                <li class="flex justify-between text-gray-700">
+                    <span>Courses</span>
+                    <span class="font-semibold text-red-600">- 84 €</span>
+                </li>
+                <li class="flex justify-between text-gray-700">
+                    <span>Essence</span>
+                    <span class="font-semibold text-red-600">- 62 €</span>
+                </li>
+                <li class="flex justify-between text-gray-700">
+                    <span>Netflix</span>
+                    <span class="font-semibold text-red-600">- 15 €</span>
+                </li>
+            </ul>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

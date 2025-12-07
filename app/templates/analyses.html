@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Analyses - FinancePro{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Analyses financières</h1>
+
+    <!-- INDICATEURS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Rendement global</h2>
+            <p class="text-4xl font-bold text-indigo-600">+ 7.4 %</p>
+            <p class="text-sm text-gray-500 mt-2">Sur les 12 derniers mois</p>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Taux d'épargne</h2>
+            <p class="text-4xl font-bold text-green-600">21 %</p>
+            <p class="text-sm text-gray-500 mt-2">Revenus vs dépenses</p>
+        </div>
+
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Risque du portefeuille</h2>
+            <p class="text-4xl font-bold text-yellow-600">Modéré</p>
+            <p class="text-sm text-gray-500 mt-2">Diversification et volatilité</p>
+        </div>
+
+    </div>
+
+    <!-- ANALYSE DU PORTEFEUILLE -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-10">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Analyse du portefeuille</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <!-- GRAPHIQUE EN CAMEMBERT -->
+            <div class="bg-gray-50 border rounded-lg p-4">
+                <div id="portfolioChart" class="h-64"></div>
+            </div>
+
+            <div class="space-y-4 text-gray-700">
+                <p>Votre portefeuille est composé de plusieurs classes d'actifs. Les actions dominent votre allocation, suivies par les ETF et enfin les cryptomonnaies.</p>
+                <p>Cette diversification permet une bonne stabilité tout en préservant le rendement.</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ANALYSE DES DÉPENSES ET REVENUS -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">Revenus vs Dépenses</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+            <!-- GRAPH BAR -->
+            <div class="bg-gray-50 border rounded-lg p-4">
+                <div id="incomeExpenseChart" class="h-64"></div>
+            </div>
+
+            <div class="space-y-4 text-gray-700">
+                <p>Vos revenus sont stables et progressent légèrement. Les dépenses montrent des variations plus marquées.</p>
+                <p>Un suivi régulier permet d’optimiser votre budget et contrôles les coûts superflus.</p>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/analyses.js') }}"></script>
+
+{% endblock %}
+
+{% block scripts %}
+
+{% endblock %}

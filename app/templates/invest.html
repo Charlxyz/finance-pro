@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Investissements - FinancePro{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+    <!-- TITRE -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">
+        Portefeuille d’investissements
+    </h1>
+
+    <!-- STATISTIQUES -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+
+        <!-- VALEUR TOTALE -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Valeur totale</h2>
+            <p class="text-4xl font-bold text-indigo-600">32 800 €</p>
+            <p class="text-sm text-gray-500 mt-2">+ 4.2 % ce mois-ci</p>
+        </div>
+
+        <!-- GAIN / PERTE -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Gain net</h2>
+            <p class="text-4xl font-bold text-green-600">+ 1 280 €</p>
+            <p class="text-sm text-gray-500 mt-2">Depuis le début</p>
+        </div>
+
+        <!-- NOMBRE D'ACTIFS -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Nombre d’actifs</h2>
+            <p class="text-4xl font-bold text-gray-800">20.18</p>
+            <p class="text-sm text-gray-500 mt-2">Actions, Crypto, ETF</p>
+        </div>
+
+    </div>
+
+    <!-- TABLEAU DES INVESTISSEMENTS -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+        <h2 class="text-xl font-semibold text-gray-800 mb-6">Vos positions</h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b bg-gray-50 text-gray-700">
+                        <th class="py-3 px-4">Actif</th>
+                        <th class="py-3 px-4">Type</th>
+                        <th class="py-3 px-4">Quantité</th>
+                        <th class="py-3 px-4">Valeur actuelle</th>
+                        <th class="py-3 px-4">Performance</th>
+                        <th class="py-3 px-4 text-right">Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody class="text-gray-700">
+
+                    <!-- EXEMPLE 1 -->
+                    <tr class="border-b">
+                        <td class="py-4 px-4 font-medium">Apple (AAPL)</td>
+                        <td class="py-4 px-4">Action</td>
+                        <td class="py-4 px-4">12</td>
+                        <td class="py-4 px-4">2 750 €</td>
+                        <td class="py-4 px-4 text-green-600 font-semibold">+ 8.4 %</td>
+                        <td class="py-4 px-4 text-right">
+                        <button onclick="openDetailModal({
+                            title: 'Apple (AAPL)',
+                            type: 'Action',
+                            quantity: '12',
+                            value: '2 750 €',
+                            performance: '+ 8.4 %',
+                            description: 'Apple Inc. est une entreprise technologique. Vous détenez ces actions depuis 2023. Recommandation : conserver.'
+                        })"
+                        class="text-indigo-600 hover:underline">
+                        Détail
+                        </button>
+                        </td>
+                    </tr>
+
+                    <!-- EXEMPLE 2 -->
+                    <tr class="border-b">
+                        <td class="py-4 px-4 font-medium">Bitcoin (BTC)</td>
+                        <td class="py-4 px-4">Crypto</td>
+                        <td class="py-4 px-4">0.18</td>
+                        <td class="py-4 px-4">5 420 €</td>
+                        <td class="py-4 px-4 text-green-600 font-semibold">+ 12.1 %</td>
+                        <td class="py-4 px-4 text-right">
+                        <button onclick="openDetailModal({
+                            title: 'Bitcoin (BTC)',
+                            type: 'Crypto',
+                            quantity: '0.18 BTC',
+                            value: '5 420 €',
+                            performance: '+ 12.1 %',
+                            description: 'Bitcoin est un actif très volatil. Votre position a fortement augmenté ce mois-ci.'
+                        })"
+                        class="text-indigo-600 hover:underline">
+                        Détail
+                        </button>
+                        </td>
+                    </tr>
+
+                    <!-- EXEMPLE 3 -->
+                    <tr class="border-b">
+                        <td class="py-4 px-4 font-medium">S&P 500 ETF (VOO)</td>
+                        <td class="py-4 px-4">ETF</td>
+                        <td class="py-4 px-4">5</td>
+                        <td class="py-4 px-4">1 920 €</td>
+                        <td class="py-4 px-4 text-green-600 font-semibold">+ 5.3 %</td>
+                        <td class="py-4 px-4 text-right">
+                        <button onclick="openDetailModal({
+                            title: 'S&P 500 ETF (VOO)',
+                            type: 'ETF',
+                            quantity: '5 parts',
+                            value: '1 920 €',
+                            performance: '+ 5.3 %',
+                            description: 'ETF diversifié répliquant 500 grandes entreprises américaines. Très bon pour un portefeuille long terme.'
+                        })"
+                        class="text-indigo-600 hover:underline">
+                        Détail
+                        </button>
+                        </td>
+                    </tr>
+
+                    <!-- EXEMPLE 4 -->
+                    <tr>
+                        <td class="py-4 px-4 font-medium">Tesla (TSLA)</td>
+                        <td class="py-4 px-4">Action</td>
+                        <td class="py-4 px-4">3</td>
+                        <td class="py-4 px-4">780 €</td>
+                        <td class="py-4 px-4 text-red-600 font-semibold">- 2.1 %</td>
+                        <td class="py-4 px-4 text-right">
+                        <button onclick="openDetailModal({
+                            title: 'Tesla (TSLA)',
+                            type: 'Action',
+                            quantity: '3',
+                            value: '780 €',
+                            performance: '- 2.1 %',
+                            description: 'Tesla Inc. a subi une légère baisse récemment. Position encore volatile.'
+                        })"
+                        class="text-indigo-600 hover:underline">
+                        Détail
+                        </button>
+                        </td>
+                    </tr>
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+<!-- MODAL DÉTAIL ACTIF -->
+<div id="modal-overlay" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-lg rounded-xl shadow-lg p-6 relative">
+
+        <!-- Bouton fermer -->
+        <button id="close-modal" class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-xl">
+            &times;
+        </button>
+
+        <h2 id="modal-title" class="text-2xl font-bold text-gray-800 mb-4">Titre actif</h2>
+
+        <div class="space-y-3 text-gray-700">
+
+            <p><span class="font-bold">Type :</span> <span id="modal-type"></span></p>
+            <p><span class="font-bold">Quantité :</span> <span id="modal-quantity"></span></p>
+            <p><span class="font-bold">Valeur actuelle :</span> <span id="modal-value"></span></p>
+            <p><span class="font-bold">Performance :</span> <span id="modal-performance"></span></p>
+
+            <hr>
+
+            <p id="modal-description" class="text-gray-600"></p>
+
+        </div>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/invest.js') }}"></script>
+
+{% endblock %}

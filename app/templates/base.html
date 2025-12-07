@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}FinancePro{% endblock %}</title>
+
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50">
+
+    {% include 'components/header.html' %}
+
+    <!-- CONTENU SPÉCIFIQUE À CHAQUE PAGE -->
+    <main class="min-h-screen">
+        {% block content %}{% endblock %}
+    </main>
+
+    {% include 'components/flash.html' %}
+
+    {% include 'components/footer.html' %}
+    
+</body>
+</html>
