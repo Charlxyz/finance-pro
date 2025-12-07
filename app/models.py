@@ -12,6 +12,7 @@ class User(UserMixin, db.Model):
     anynonymous = db.Column(db.Boolean, default=False)
     dark_mode = db.Column(db.Boolean, default=False)
     news_letter_subscribed = db.Column(db.Boolean, default=True)
+    role = db.Column(db.String(20), default='user')
 
 @login_manager.user_loader
 def load_user(user_id):
