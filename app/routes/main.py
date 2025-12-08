@@ -1,5 +1,7 @@
 from flask import Blueprint, redirect, render_template, request, flash
 from flask_login import logout_user
+from ..models import User
+from ..extensions import db
 
 # Création du blueprint
 main_bp = Blueprint("main", __name__)
@@ -32,17 +34,7 @@ def analyses():
 
 @main_bp.route("/account")
 def account():
-    flash("Bienvenue sur votre page de compte !", "success")
-    flash("N'oubliez pas de vérifier vos informations.", "info")
-    flash("Erreur lors du chargement des données.", "error")
-    flash("Ceci est un avertissement.", "warning")
-    
-    user = {
-        "name": "Jean Dupont",
-        "email": "jean.dupont@example.com",
-        "active": True,
-        "initials": "JD"
-    }
+    user = User.query.first()
 
     balances = {
         "total": "12 450 €",
@@ -54,17 +46,10 @@ def account():
 
 @main_bp.route("/account/edit", methods=["GET", "POST"])
 def edit_account():
-
-    # Simulation d'un utilisateur existant
-    user = {
-        "name": "Jean Dupont",
-        "email": "jean.dupont@example.com",
-        "initials": "JD",
-        "darkmode": True,
-        "newsletter": False
-    }
+    user = User.query.first()
 
     if request.method == "POST":
+        print(request.form)
 
         # Récupération des informations
         name = request.form.get("name")
@@ -75,6 +60,14 @@ def edit_account():
         darkmode = "darkmode" in request.form
         newsletter = "newsletter" in request.form
 
+        if name:
+            user.name = name
+        if email:
+            user.email = email
+
+        user.dark_mode = True if darkmode else False
+        user.news_letter_subscribed = True if newsletter else False
+
         # Photo de profil
         avatar_file = request.files.get("avatar")
         if avatar_file:
@@ -82,12 +75,16 @@ def edit_account():
 
         # Vérification du mot de passe
         if new_password and new_password != confirm_password:
-            return "Les mots de passe ne correspondent pas"
+            flash("Les mots de passe ne correspondent pas", "error")
 
-        print("MODIFICATIONS ENREGISTRÉES :")
-        print(name, email, darkmode, newsletter)
+        if old_password and new_password:
+            if user.check_password(old_password):
+                user.set_password(new_password)
+            else:
+                flash("Ancien mot de passe incorrect", "error")
 
-        # Redirection
+        db.session.commit()
+        flash("Compte mis à jour avec succès", "success")
         return redirect("/account")
 
     return render_template("edit_account.html", user=user)
