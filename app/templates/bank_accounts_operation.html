@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+
+{% block title %}Opérations - {{ account_label }}{% endblock %}
+
+{% block content %}
+
+<div class="max-w-6xl mx-auto px-4 py-10">
+
+    <a href="/comptes-bancaires" class="text-indigo-600 hover:underline text-sm">
+        ← Retour à mes comptes
+    </a>
+
+    <h1 class="text-3xl font-bold text-gray-800 mt-4 mb-6">
+        Opérations – {{ account_label }}
+    </h1>
+
+    <!-- RÉSUMÉ DES OPÉRATIONS -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+
+        <div class="bg-white p-6 border rounded-xl shadow-sm">
+            <p class="text-gray-600 text-sm">Nombre total d’opérations</p>
+            <p class="text-3xl font-bold text-gray-800 mt-2">{{ summary.total_ops }}</p>
+        </div>
+
+        <div class="bg-white p-6 border rounded-xl shadow-sm">
+            <p class="text-gray-600 text-sm">Entrées</p>
+            <p class="text-3xl font-bold text-green-600 mt-2">+ {{ summary.total_in }} €</p>
+        </div>
+
+        <div class="bg-white p-6 border rounded-xl shadow-sm">
+            <p class="text-gray-600 text-sm">Sorties</p>
+            <p class="text-3xl font-bold text-red-600 mt-2">{{ summary.total_out }} €</p>
+        </div>
+
+    </div>
+
+    <!-- TABLEAU DES OPÉRATIONS -->
+    <div class="bg-white border rounded-xl shadow-sm p-6">
+
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+            Historique des opérations
+        </h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full border-collapse">
+                <thead>
+                    <tr class="bg-gray-50 border-b text-gray-700 text-sm">
+                        <th class="py-3 px-4 text-left">Date</th>
+                        <th class="py-3 px-4 text-left">Description</th>
+                        <th class="py-3 px-4 text-left">Catégorie</th>
+                        <th class="py-3 px-4 text-right">Montant</th>
+                    </tr>
+                </thead>
+
+                <tbody class="text-gray-700 text-sm">
+                    {% for op in operations %}
+                    <tr class="border-b">
+                        <td class="py-3 px-4">{{ op.date }}</td>
+                        <td class="py-3 px-4">{{ op.desc }}</td>
+                        <td class="py-3 px-4">{{ op.category }}</td>
+                        <td class="py-3 px-4 text-right font-semibold
+                            {% if op.amount_numeric >= 0 %}
+                                text-green-600
+                            {% else %}
+                                text-red-600
+                            {% endif %}">
+                            {{ op.amount }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="py-4 text-center text-gray-500">Aucune opération trouvée.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

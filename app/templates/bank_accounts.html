@@ -1,0 +1,168 @@
+{% extends 'base.html' %}
+
+{% block title %}Mes comptes bancaires - FinancePro{% endblock %}
+
+{% block content %}
+
+<div class="max-w-7xl mx-auto px-4 py-10">
+
+    <!-- TITRE -->
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">
+        Mes comptes bancaires
+    </h1>
+
+    <!-- RÉSUMÉ GLOBAL -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
+
+        <!-- Total liquidités -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Total liquidités</h2>
+            <p class="text-4xl font-bold text-indigo-600">
+                {{ summary.total_balance if summary else "25 430 €" }}
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Somme de tous vos comptes bancaires
+            </p>
+        </div>
+
+        <!-- Nombre de comptes -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Nombre de comptes</h2>
+            <p class="text-4xl font-bold text-gray-800">
+                {{ summary.count if summary else "3" }}
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Comptes courants, livrets, épargne
+            </p>
+        </div>
+
+        <!-- Compte principal -->
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+            <h2 class="text-lg font-semibold text-gray-700 mb-2">Compte principal</h2>
+            <p class="text-xl font-semibold text-gray-800">
+                {{ summary.main_bank if summary else "BNP Paribas" }}
+            </p>
+            <p class="text-sm text-gray-500 mt-2">
+                Compte utilisé par défaut pour vos opérations
+            </p>
+        </div>
+
+    </div>
+
+    <!-- CARTES DES COMPTES -->
+    <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+        Liste de vos comptes
+    </h2>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-10">
+
+        {% for account in accounts %}
+        <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col justify-between">
+
+            <div class="mb-4">
+                <p class="text-sm text-gray-500 uppercase tracking-wide">
+                    {{ account.bank_name }}
+                </p>
+                <p class="text-lg font-semibold text-gray-800">
+                    {{ account.label }}
+                </p>
+                <p class="text-sm text-gray-500 mt-1">
+                    {{ account.type }} · {{ account.currency }}
+                </p>
+            </div>
+
+            <div class="mb-4">
+                <p class="text-sm text-gray-500">IBAN</p>
+                <p class="font-mono text-sm text-gray-700">
+                    {{ account.iban_masked }}
+                </p>
+            </div>
+
+            <div class="flex items-center justify-between mt-2">
+                <div>
+                    <p class="text-sm text-gray-500">Solde</p>
+                    <p class="text-2xl font-bold 
+                        {% if account.balance_numeric >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ account.balance }}
+                    </p>
+                </div>
+
+                <div class="text-right">
+                    <p class="text-sm text-gray-500">Statut</p>
+                    {% if account.active %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-700">
+                            Actif
+                        </span>
+                    {% else %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-200 text-gray-700">
+                            Inactif
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="mt-4 flex justify-between items-center">
+                <a href="/bank-accounts/{{ account.id }}" class="text-indigo-600 hover:underline text-sm">
+                    Détails du compte
+                </a>
+                <a href="/bank-accounts/{{ account.id }}/operations" 
+                class="text-gray-500 hover:text-gray-700 text-sm">
+                    Voir les opérations
+                </a>
+            </div>
+
+        </div>
+        {% else %}
+        <p class="text-gray-600">Aucun compte bancaire enregistré pour le moment.</p>
+        {% endfor %}
+
+    </div>
+
+    <!-- DERNIERS MOUVEMENTS TOUS COMPTES -->
+    <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
+
+        <h2 class="text-2xl font-semibold text-gray-800 mb-4">
+            Derniers mouvements
+        </h2>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b bg-gray-50 text-gray-700 text-sm">
+                        <th class="py-3 px-4">Date</th>
+                        <th class="py-3 px-4">Compte</th>
+                        <th class="py-3 px-4">Description</th>
+                        <th class="py-3 px-4">Catégorie</th>
+                        <th class="py-3 px-4 text-right">Montant</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-700 text-sm">
+
+                    {% for tx in transactions %}
+                    <tr class="border-b">
+                        <td class="py-3 px-4">{{ tx.date }}</td>
+                        <td class="py-3 px-4">{{ tx.account_label }}</td>
+                        <td class="py-3 px-4">{{ tx.description }}</td>
+                        <td class="py-3 px-4">{{ tx.category }}</td>
+                        <td class="py-3 px-4 text-right font-semibold
+                            {% if tx.amount_numeric >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                            {{ tx.amount }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="py-4 px-4 text-center text-gray-500">
+                            Aucun mouvement récent.
+                        </td>
+                    </tr>
+                    {% endfor %}
+
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}
