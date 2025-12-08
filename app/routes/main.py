@@ -11,30 +11,9 @@ main_bp = Blueprint("main", __name__)
 def home():
     return render_template("home.html")
 
-# Exemple : page "à propos"
-@main_bp.route("/about")
-def about():
-    return render_template("about.html")
-
 @main_bp.route("/dashboard")
 def dashboard():
     return render_template("dashboard.html")
-
-@main_bp.route("/contact")
-def contact():
-    return render_template("contact.html")
-
-@main_bp.route("/conditions")
-def conditions():
-    return render_template("user_condition.html")
-
-@main_bp.route("/confidentialite")
-def confidentiality():
-    return render_template("confidentiality.html")
-
-@main_bp.route("/faq")
-def faq():
-    return render_template("faq.html")
 
 @main_bp.route("/invest")
 def invest():
@@ -44,6 +23,26 @@ def invest():
 def analyses():
     return render_template("analyses.html")
 
+# --- Dossier INFO ---
+@main_bp.route("/contact")
+def contact():
+    return render_template("info/contact.html")
+
+@main_bp.route("/faq")
+def faq():
+    return render_template("info/faq.html")
+
+# --- Dossier LEGAL ---
+
+@main_bp.route("/conditions")
+def conditions():
+    return render_template("legal/user_condition.html")
+
+@main_bp.route("/confidentialite")
+def confidentiality():
+    return render_template("legal/confidentiality.html")
+
+# --- Dossier account ---
 @main_bp.route("/account")
 def account():
     user = User.query.first()
@@ -101,6 +100,7 @@ def edit_account():
 
     return render_template("edit_account.html", user=user)
 
+# --- Dossier bank ---
 @main_bp.route("/bank-accounts")
 def comptes_bancaires():
     # Simulation : ces données viendront plus tard de ta base SQL

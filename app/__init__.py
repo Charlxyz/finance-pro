@@ -18,6 +18,6 @@ def create_app():
     @app.errorhandler(404)
     def page_not_found(e):
         flash("La page que vous recherchez n'existe pas.", 'error')
-        return render_template("404.html")
+        return render_template("error/404.html")
 
     return app
