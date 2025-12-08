@@ -1,0 +1,145 @@
+{% extends 'base.html' %}
+
+{% block title %}FAQ - FinancePro{% endblock %}
+
+{% block content %}
+
+<div class="max-w-5xl mx-auto px-4 py-14">
+
+    <h1 class="text-3xl font-bold text-gray-800 text-center mb-10">
+        Foire Aux Questions (FAQ)
+    </h1>
+
+    <p class="text-center text-gray-600 mb-12 max-w-2xl mx-auto">
+        Trouvez ici les réponses aux questions les plus fréquentes concernant votre compte, la sécurité, les investissements
+        et l’utilisation de la plateforme FinancePro.
+    </p>
+
+    <!-- SECTION 1 — Compte utilisateur -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Compte utilisateur</h2>
+
+        <div class="space-y-4">
+
+            <!-- QUESTION -->
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    Comment créer un compte FinancePro ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    Pour créer un compte, cliquez sur "Inscription" dans la barre de navigation, remplissez vos informations
+                    personnelles puis validez. Vous recevrez un email de confirmation.
+                </div>
+            </div>
+
+            <!-- QUESTION -->
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    Comment modifier mes informations personnelles ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    Accédez à votre profil puis cliquez sur "Modifier mes informations". Vous pourrez mettre à jour votre nom,
+                    adresse email, mot de passe et préférences.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SECTION 2 — Sécurité -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Sécurité</h2>
+
+        <div class="space-y-4">
+
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    La double authentification est-elle disponible ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    Oui, vous pouvez activer une double authentification dans la section "Sécurité" de votre compte
+                    pour renforcer la protection de votre profil.
+                </div>
+            </div>
+
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    Comment FinancePro protège mes données bancaires ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    Toutes vos données sont chiffrées et stockées de manière sécurisée. Aucun accès externe n’est autorisé
+                    et nous respectons les normes de sécurité bancaire européennes.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SECTION 3 — Investissements -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Investissements</h2>
+
+        <div class="space-y-4">
+
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    Quels types d’investissements puis-je suivre ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    Vous pouvez suivre vos actions, ETF, cryptomonnaies, fonds obligataires et autres classes d’actifs.
+                </div>
+            </div>
+
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    FinancePro donne-t-il des conseils d’investissement ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    FinancePro ne fournit pas de conseils personnalisés mais propose des analyses basées sur les données 
+                    de votre portefeuille.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SECTION 4 — Comptes bancaires -->
+    <div class="mb-12">
+        <h2 class="text-2xl font-semibold text-gray-800 mb-6">Comptes bancaires</h2>
+
+        <div class="space-y-4">
+
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    Puis-je connecter plusieurs comptes bancaires ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    Oui, vous pouvez ajouter autant de comptes que nécessaire afin d’obtenir une vue globale de vos finances.
+                </div>
+            </div>
+
+            <div class="border rounded-xl">
+                <button class="faq-btn w-full text-left px-5 py-4 font-semibold text-gray-800 flex justify-between items-center">
+                    Les opérations sont-elles importées automatiquement ?
+                    <span class="faq-icon text-gray-500 text-xl">+</span>
+                </button>
+                <div class="faq-content px-5 pb-4 text-gray-600 hidden">
+                    Cette fonctionnalité sera bientôt disponible. Pour le moment, vous pouvez importer vos opérations manuellement.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/faq.js') }}"></script>
+
+{% endblock %}

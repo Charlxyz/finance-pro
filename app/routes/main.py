@@ -24,6 +24,18 @@ def dashboard():
 def contact():
     return render_template("contact.html")
 
+@main_bp.route("/conditions")
+def conditions():
+    return render_template("user_condition.html")
+
+@main_bp.route("/confidentialite")
+def confidentiality():
+    return render_template("confidentiality.html")
+
+@main_bp.route("/faq")
+def faq():
+    return render_template("faq.html")
+
 @main_bp.route("/invest")
 def invest():
     return render_template("invest.html")
