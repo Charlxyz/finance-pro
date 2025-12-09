@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, redirect, request, url_for, flash
-from flask_login import login_user, logout_user, current_user
+from flask_login import login_required, login_user, logout_user, current_user
 from ..models import User
 from ..extensions import db, bcrypt
 
@@ -59,6 +59,8 @@ def register():
     return render_template("auth/register.html")
 
 @auth_bp.route("/logout")
+@login_required
 def logout():
     logout_user()
+    flash("Vous avez été déconnecter avec sucess.", "success")
     return redirect(url_for("main.home"))

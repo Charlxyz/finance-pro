@@ -53,7 +53,7 @@ def account():
         "expense": "1 260 €"
     }
 
-    return render_template("account.html", user=user, balances=balances)
+    return render_template("account/account.html", user=user, balances=balances)
 
 @main_bp.route("/account/edit", methods=["GET", "POST"])
 def edit_account():
@@ -98,7 +98,7 @@ def edit_account():
         flash("Compte mis à jour avec succès", "success")
         return redirect("/account")
 
-    return render_template("edit_account.html", user=user)
+    return render_template("account/edit_account.html", user=user)
 
 # --- Dossier bank ---
 @main_bp.route("/bank-accounts")
@@ -182,7 +182,7 @@ def comptes_bancaires():
     ]
 
     return render_template(
-        "bank_accounts.html", accounts=accounts, summary=summary, transactions=transactions,)
+        "bank/bank_accounts.html", accounts=accounts, summary=summary, transactions=transactions,)
 
 @main_bp.route("/bank-accounts/<int:account_id>")
 def compte_detail(account_id):
@@ -234,7 +234,7 @@ def compte_detail(account_id):
         {"date": "07/12/2025", "description": "Essence", "amount": "- 65 €", "amount_numeric": -65},
     ]
 
-    return render_template("bank_accounts_detail.html", account=account, transactions=transactions)
+    return render_template("bank/bank_accounts_detail.html", account=account, transactions=transactions)
 
 @main_bp.route("/bank-accounts/<int:account_id>/operations")
 def compte_operations(account_id):
@@ -267,4 +267,29 @@ def compte_operations(account_id):
         "total_out": sum(op["amount_numeric"] for op in operations if op["amount_numeric"] < 0),
     }
 
-    return render_template("bank_accounts_operation.html", account_id=account_id, account_label=account_label, operations=operations, summary=summary)
+    return render_template("bank/bank_accounts_operation.html", account_id=account_id, account_label=account_label, operations=operations, summary=summary)
+
+@main_bp.route("/depenses/ajouter", methods=["GET", "POST"])
+def ajouter_depense():
+
+    # Exemple de comptes (plus tard remplacé par SQLAlchemy)
+    accounts = [
+        {"id": 1, "label": "Compte courant perso", "balance": "3 250 €"},
+        {"id": 2, "label": "Livret A", "balance": "8 700 €"},
+        {"id": 3, "label": "Compte joint", "balance": "13 480 €"},
+    ]
+
+    if request.method == "POST":
+        amount = float(request.form["amount"])
+        category = request.form["category"]
+        date = request.form["date"]
+        description = request.form.get("description", "")
+        account_id = int(request.form["account_id"])
+
+        # Tu pourras enregistrer ici dans la base SQL
+        print("DÉPENSE AJOUTÉE :", amount, category, date, description, account_id)
+
+        flash("Dépense ajoutée avec succès.", "success")
+        return redirect("/depenses/ajouter")
+
+    return render_template("bank/depense.html", accounts=accounts)
