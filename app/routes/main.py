@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date, datetime
 from flask import Blueprint, redirect, render_template, request, flash
 from flask_login import current_user, login_required, logout_user
 from ..models import User, MainBankAccount, Transaction
@@ -61,8 +61,6 @@ def edit_account():
     user = User.query.first()
 
     if request.method == "POST":
-        print(request.form)
-
         # Récupération des informations
         name = request.form.get("name")
         email = request.form.get("email")
@@ -100,6 +98,18 @@ def edit_account():
         return redirect("/account")
 
     return render_template("account/edit_account.html", user=user)
+
+@main_bp.route("/account/confidentiality", methods=["POST"])
+@login_required
+def update_confidentiality():
+    data = request.get_json()
+
+    current_user.anonymous = data.get("visible", current_user.anonymous)
+    db.session.commit()
+
+    flash("Paramètres de confidentialité mis à jour.", "success")
+
+    return {"status": "success"}, 200
 
 # --- Dossier bank ---
 @main_bp.route("/bank-accounts")
@@ -281,3 +291,44 @@ def confirm_activation(account_id):
         flash("Le code entré est incorrect.", "error")
 
     return redirect(f"/bank-accounts/{account_id}")
+
+@main_bp.route("/api/get/salary")
+def get_salary():
+    today = date.today()
+    start_month = date(today.year, today.month, 1)
+
+    salary = Transaction.query.filter_by(
+        id=current_user.id,
+        category="Salaire"
+    ).filter(
+        Transaction.date >= start_month,
+        Transaction.date <= today
+    ).first()
+
+    total_salary = sum(s.amount for s in salary) if salary else 0.0
+
+    return { "salary": abs(total_salary) if salary else 0.0 }
+
+@main_bp.route("/api/get/depence")
+def get_depence():
+    today = date.today()
+    start_month = date(today.year, today.month, 1)
+
+    depence = Transaction.query.filter_by(
+        id=current_user.id,
+    ).filter(
+        Transaction.date >= start_month,
+        Transaction.date <= today,
+        Transaction.amount < 0
+    ).all()
+
+    total_depence = sum(d.amount for d in depence)
+
+    return { "depence": abs(total_depence) if total_depence else 0.0 }
+
+@main_bp.route("/api/get/bank_amount")
+def get_bank_amount():
+    accounts = MainBankAccount.query.filter_by(user_id=current_user.id, main_account=1).all()
+    total_amount = sum(acc.balance for acc in accounts)
+
+    return { "bank_amount": total_amount }

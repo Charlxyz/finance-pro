@@ -41,6 +41,7 @@ class MainBankAccount(db.Model):
     balance = db.Column(db.Float, default=0.0)
     iban = db.Column(db.String(24), unique=True, nullable=False)
     status = db.Column(db.Boolean, default=False)
+    main_account = db.Column(db.Boolean, default=False)
 
     # Relation avec User
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

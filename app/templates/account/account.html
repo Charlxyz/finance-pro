@@ -32,13 +32,15 @@
             <div class="mt-6">
                 <p class="text-gray-700 font-semibold mb-2">Statut du compte :</p>
 
-                {% if user and user.active %}
+                {% if user and user.certified %}
                     <span class="bg-green-100 text-green-700 px-3 py-1 rounded-lg text-sm font-medium">
                         Actif
                     </span>
                 {% else %}
                     <span class="bg-red-100 text-red-700 px-3 py-1 rounded-lg text-sm font-medium">
-                        Inactif
+                        <button onclick="openStatusAccountModal()">
+                            Inactif
+                        </button>
                     </span>
                 {% endif %}
             </div>
@@ -47,7 +49,6 @@
 
             <!-- BOUTONS DE RÉGLAGES -->
             <div class="space-y-4">
-
                 <a href="/account/edit"
                    class="block w-full text-center py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition">
                     Modifier mes informations
@@ -81,13 +82,23 @@
                     </div>
 
                     <!-- Sécurité -->
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <p class="font-semibold text-gray-800">Double authentification</p>
-                            <p class="text-gray-600 text-sm">Renforcez la sécurité de votre compte.</p>
+                    {% if user and user.double_auth_enabled %}
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold text-gray-800">Double authentification</p>
+                                <p class="text-gray-600 text-sm">La double authentification est activée.</p>
+                            </div>
+                            <button onclick="openTwoFASettingsModal()" class="text-indigo-600 hover:underline">Gérer</button>
                         </div>
-                        <button onclick="openTwoFAModal()" class="text-indigo-600 hover:underline">Configurer</button>
-                    </div>
+                    {% else %}
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="font-semibold text-gray-800">Double authentification</p>
+                                <p class="text-gray-600 text-sm">Renforcez la sécurité de votre compte.</p>
+                            </div>
+                            <button onclick="openTwoFAModal()" class="text-indigo-600 hover:underline">Configurer</button>
+                        </div>
+                    {% endif %}
 
                     <!-- Confidentialité -->
                     <div class="flex items-center justify-between">
@@ -107,12 +118,11 @@
                 <h2 class="text-2xl font-semibold text-gray-800 mb-6">Revue rapide des comptes</h2>
 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
                     <!-- SOLDE -->
                     <div class="bg-gray-50 p-4 rounded-lg border">
                         <p class="text-gray-700 font-semibold">Solde actuel</p>
                         <p class="text-3xl font-bold text-indigo-600 mt-2">
-                            {{ balances.total if balances else "12 450 €" }}
+                            <span id="bank-amount"></span>
                         </p>
                     </div>
 
@@ -120,7 +130,7 @@
                     <div class="bg-gray-50 p-4 rounded-lg border">
                         <p class="text-gray-700 font-semibold">Revenus du mois</p>
                         <p class="text-3xl font-bold text-green-600 mt-2">
-                            {{ balances.income if balances else "2 300 €" }}
+                            <span id="monthly-salary-amount"></span>
                         </p>
                     </div>
 
@@ -128,7 +138,7 @@
                     <div class="bg-gray-50 p-4 rounded-lg border">
                         <p class="text-gray-700 font-semibold">Dépenses du mois</p>
                         <p class="text-3xl font-bold text-red-600 mt-2">
-                            {{ balances.expense if balances else "1 260 €" }}
+                            <span id="monthly-depence-amount"></span>
                         </p>
                     </div>
                 </div>
@@ -163,7 +173,7 @@
                     <p class="text-gray-600 text-sm">Permettre aux autres utilisateurs de voir votre profil public.</p>
                 </div>
                 <label class="switch cursor-pointer">
-                    <input type="checkbox" id="profileVisibility" checked>
+                    <input type="checkbox" id="profileVisibility" {% if user.anonymous %} checked {% endif %}>
                     <span class="slider"></span>
                 </label>
             </div>
@@ -250,16 +260,160 @@
                 class="w-full py-2 text-gray-600 hover:text-gray-800 text-sm">
                 Renvoyer le code
             </button>
-
         </div>
 
         <!-- ÉTAPE 3 : VALIDÉ -->
         <div id="step-success" class="hidden text-center space-y-4">
             <p class="text-green-600 font-semibold text-lg">Double authentification activée avec succès !</p>
-            <button onclick="closeTwoFAModal()" 
+            <button onclick="reloadTwoFAModal()" 
                 class="px-6 py-2 bg-indigo-600 text-white rounded-lg">
                 Fermer
             </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL 2FA SETTING -->
+<div id="twofa-settings-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-lg rounded-xl shadow-lg p-6 relative">
+        <!-- Bouton fermer -->
+        <button onclick="closeTwoFASettingsModal()" 
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">
+            &times;
+        </button>
+
+        <!-- TITRE -->
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            Double authentification (2FA)
+        </h2>
+
+        <!-- DESCRIPTION -->
+        <p class="text-gray-600 mb-6">
+            La double authentification est actuellement activée sur votre compte. Vous pouvez la désactiver ou la reconfigurer ci-dessous.
+        </p>
+
+        <!-- ÉTAPE 1 : BOUTON DESACTIVE -->
+        <div id="step-activate" class="space-y-6">
+            <button onclick="verifyDisable2af()" 
+                class="w-full py-3 bg-red-600 text-white font-semibold rounded-lg hover:bg-red-700 transition">
+                Désactivé la double authentification
+            </button>
+        </div>
+
+        <!-- ÉTAPE 2 : VALIDÉ -->
+        <div id="step-success" class="hidden text-center space-y-4">
+            <p class="text-green-600 font-semibold text-lg">Double authentification activée avec succès !</p>
+            <button onclick="reloadTwoFASettingsModal()" 
+                class="px-6 py-2 bg-indigo-600 text-white rounded-lg">
+                Fermer
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL STATUS COMPTE -->
+<div id="status-account-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+    <div class="bg-white w-full max-w-xl rounded-xl shadow-lg p-6 relative">
+        <!-- Bouton fermer -->
+        <button onclick="closeStatusAccountModal()" 
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">
+            &times;
+        </button>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            Activation du compte
+        </h2>
+
+        <p class="text-gray-600 mb-6">
+            Gérez ici l'activation de votre compte bancaire et accédez à toutes les fonctionnalités de FinancePro.
+        </p>
+
+        
+            {% if not user.phone_number %}
+                <!-- Etape 1 : Ajouter un numéro de téléphone -->
+                <div id="step-phone-activate" class="space-y-6">
+                    <div class="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4" role="alert">
+                        <p class="font-bold">Numéro de téléphone requis</p>
+                        <p>Veuillez ajouter un numéro de téléphone à votre profil pour activer la double authentification et sécuriser votre compte.</p>
+                    </div>
+                    
+                    <p class="font-semibold text-gray-800">Entrez votre numéros de téléphone</p>
+                    
+                    <input id="phone_number" maxlength="10" placeholder="Entrez votre numéros de téléphone"
+                    class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-600">
+
+                    <hr>
+
+                    <!-- Enregistrer -->
+                    <button onclick="sendPhoneNumberVerify()"
+                    class="w-full py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition">
+                        Enregistrer le numéro et activer mon compte
+                    </button>
+                </div>
+
+                <!-- ÉTAPE 2 : CHAMP CODE -->
+                <div id="step-phone-verify" class="hidden space-y-6">
+                    <p class="text-gray-700">Un code à 6 chiffres vient de vous être envoyé.</p>
+
+                    <input id="activation-code-input" maxlength="6" placeholder="Entrez le code"
+                        class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-600">
+
+                    <button onclick="verifyActivationCode(phone_number.value)"
+                        class="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
+                        Vérifier et activer
+                    </button>
+
+                    <button onclick="sendPhoneNumberVerify()" 
+                        class="w-full py-2 text-gray-600 hover:text-gray-800 text-sm">
+                        Renvoyer le code
+                    </button>
+                </div>
+
+                <!-- ÉTAPE 3 : VALIDÉ -->
+                <div id="step-success" class="hidden text-center space-y-4">
+                    <p class="text-green-600 font-semibold text-lg">Double authentification activée avec succès !</p>
+                    <button onclick="reloadStatusAccountModal()" 
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg">
+                        Fermer
+                    </button>
+                </div>
+
+            {% else %}
+                <!-- ÉTAPE 1 : BOUTON ACTIVER -->
+                <div id="step-account-activate" class="space-y-6">
+                    <button onclick="sendAccountVerify()" 
+                        class="w-full py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                        Verrifier mon compte
+                    </button>
+                </div>
+
+                <!-- ÉTAPE 2 : CHAMP CODE -->
+                <div id="step-account-verify" class="hidden space-y-6">
+                    <p class="text-gray-700">Un code à 6 chiffres vient de vous être envoyé.</p>
+
+                    <input id="account-activation-code-input" maxlength="6" placeholder="Entrez le code"
+                        class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-600">
+
+                    <button onclick="verifyAccountCode()"
+                        class="w-full py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition">
+                        Vérifier et activer
+                    </button>
+
+                    <button onclick="sendAccountVerify()" 
+                        class="w-full py-2 text-gray-600 hover:text-gray-800 text-sm">
+                        Renvoyer le code
+                    </button>
+                </div>
+
+                <!-- ÉTAPE 3 : VALIDÉ -->
+                <div id="step-account-success" class="hidden text-center space-y-4">
+                    <p class="text-green-600 font-semibold text-lg">Double authentification activée avec succès !</p>
+                    <button onclick="reloadStatusAccountModal()" 
+                        class="px-6 py-2 bg-indigo-600 text-white rounded-lg">
+                        Fermer
+                    </button>
+                </div>
+            {% endif %}
         </div>
     </div>
 </div>
