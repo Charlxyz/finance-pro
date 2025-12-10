@@ -5,15 +5,18 @@
 {% block content %}
 
 <div class="max-w-7xl mx-auto px-4 py-10">
-
     <!-- TITRE -->
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">
-        Mes comptes bancaires
-    </h1>
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-10">
+        <h1 class="text-3xl font-bold text-gray-800">Mes comptes bancaires</h1>
+
+        <button onclick="openAddBankModal()"
+        class="mt-4 md:mt-0 inline-flex items-center px-5 py-3 bg-indigo-600 text-white font-semibold rounded-lg shadow hover:bg-indigo-700 transition">
+            + Ajouter un compte bancaire
+        </button>
+    </div>
 
     <!-- RÉSUMÉ GLOBAL -->
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10">
-
         <!-- Total liquidités -->
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
             <h2 class="text-lg font-semibold text-gray-700 mb-2">Total liquidités</h2>
@@ -46,7 +49,6 @@
                 Compte utilisé par défaut pour vos opérations
             </p>
         </div>
-
     </div>
 
     <!-- CARTES DES COMPTES -->
@@ -55,26 +57,24 @@
     </h2>
 
     <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 mb-10">
-
         {% for account in accounts %}
         <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-5 flex flex-col justify-between">
-
             <div class="mb-4">
                 <p class="text-sm text-gray-500 uppercase tracking-wide">
-                    {{ account.bank_name }}
+                    {{ account.bank_origin }}
                 </p>
                 <p class="text-lg font-semibold text-gray-800">
-                    {{ account.label }}
+                    {{ account.account_name }}
                 </p>
                 <p class="text-sm text-gray-500 mt-1">
-                    {{ account.type }} · {{ account.currency }}
+                    {{ account.type_account }} · {{ account.balance }} {% if account.currency == 'EUR' %}€{% elif account.currency == 'USD' %}${% endif %}
                 </p>
             </div>
 
             <div class="mb-4">
                 <p class="text-sm text-gray-500">IBAN</p>
                 <p class="font-mono text-sm text-gray-700">
-                    {{ account.iban_masked }}
+                    {{ account.iban }}
                 </p>
             </div>
 
@@ -82,8 +82,8 @@
                 <div>
                     <p class="text-sm text-gray-500">Solde</p>
                     <p class="text-2xl font-bold 
-                        {% if account.balance_numeric >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
-                        {{ account.balance }}
+                        {% if account.balance >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                        {{ account.balance }} {% if account.currency == 'EUR' %}€{% elif account.currency == 'USD' %}${% endif %}
                     </p>
                 </div>
 
@@ -110,8 +110,8 @@
                     Voir les opérations
                 </a>
             </div>
-
         </div>
+
         {% else %}
         <p class="text-gray-600">Aucun compte bancaire enregistré pour le moment.</p>
         {% endfor %}
@@ -120,7 +120,6 @@
 
     <!-- DERNIERS MOUVEMENTS TOUS COMPTES -->
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">
             Derniers mouvements
         </h2>
@@ -145,7 +144,7 @@
                         <td class="py-3 px-4">{{ tx.description }}</td>
                         <td class="py-3 px-4">{{ tx.category }}</td>
                         <td class="py-3 px-4 text-right font-semibold
-                            {% if tx.amount_numeric >= 0 %}text-green-600{% else %}text-red-600{% endif %}">
+                            {% if tx.amount_numeric > 0 %}text-green-600{% else %}text-red-600{% endif %}">
                             {{ tx.amount }}
                         </td>
                     </tr>
@@ -156,13 +155,99 @@
                         </td>
                     </tr>
                     {% endfor %}
-
                 </tbody>
             </table>
         </div>
-
     </div>
-
 </div>
+
+<!-- MODAL AJOUT COMPTE BANCAIRE -->
+<div id="add-bank-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative overflow-y-auto max-h-[90vh]">
+        <!-- Bouton fermer -->
+        <button onclick="closeAddBankModal()"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">
+            &times;
+        </button>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-6">
+            Ajouter un compte bancaire
+        </h2>
+
+        <form action="/bank-accounts/add" method="POST" class="space-y-6">
+
+            <!-- Banque -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Banque</label>
+                <input type="text" name="bank_origin" required
+                       placeholder="Ex : BNP Paribas"
+                       class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <!-- Nom du compte -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Compte</label>
+                <input type="text" name="account_name" required
+                       placeholder="Ex : Compte courant"
+                       class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <!-- Type -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Type de compte</label>
+                <select name="type_account" required
+                        class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500">
+                    <option value="">Sélectionner</option>
+                    <option value="Compte courant">Compte courant</option>
+                    <option value="Épargne">Épargne</option>
+                    <option value="Joint">Joint</option>
+                </select>
+            </div>
+
+            <!-- Devise -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Devise</label>
+                <select name="currency"
+                        class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500">
+                    <option value="EUR">EUR (€)</option>
+                    <option value="USD">USD ($)</option>
+                </select>
+            </div>
+
+            <!-- Solde -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Solde initial (€)</label>
+                <input type="number" step="0.01" name="balance" required
+                       placeholder="Ex : 1500.00"
+                       class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <!-- IBAN -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">IBAN</label>
+                <input type="text" name="iban" required
+                       placeholder="FR76 **** **** **** **** **** ***"
+                       class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex justify-between pt-4">
+
+                <button type="button" onclick="closeAddBankModal()"
+                        class="py-3 px-6 bg-gray-100 border rounded-lg text-gray-700 hover:bg-gray-200 transition">
+                    Annuler
+                </button>
+
+                <button type="submit"
+                        class="py-3 px-6 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                    Ajouter le compte
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script src="{{ url_for('static', filename='js/bank-accounts.js') }}"></script>
 
 {% endblock %}

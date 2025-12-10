@@ -1,6 +1,7 @@
+from datetime import datetime
 from flask import Blueprint, redirect, render_template, request, flash
-from flask_login import logout_user
-from ..models import User
+from flask_login import current_user, login_required, logout_user
+from ..models import User, MainBankAccount, Transaction
 from ..extensions import db
 
 # Création du blueprint
@@ -103,82 +104,25 @@ def edit_account():
 # --- Dossier bank ---
 @main_bp.route("/bank-accounts")
 def comptes_bancaires():
-    # Simulation : ces données viendront plus tard de ta base SQL
-    accounts = [
-        {
-            "id": 1,
-            "bank_name": "BNP Paribas",
-            "label": "Compte courant perso",
-            "type": "Compte courant",
-            "currency": "EUR",
-            "iban_masked": "FR76 **** **** 1234 5678 901",
-            "balance": "3 250 €",
-            "balance_numeric": 3250,
-            "active": True,
-        },
-        {
-            "id": 2,
-            "bank_name": "Crédit Agricole",
-            "label": "Livret A",
-            "type": "Épargne",
-            "currency": "EUR",
-            "iban_masked": "FR12 **** **** 9876 5432 109",
-            "balance": "8 700 €",
-            "balance_numeric": 8700,
-            "active": True,
-        },
-        {
-            "id": 3,
-            "bank_name": "Boursorama",
-            "label": "Compte joint",
-            "type": "Compte courant",
-            "currency": "EUR",
-            "iban_masked": "FR98 **** **** 4567 8901 234",
-            "balance": "13 480 €",
-            "balance_numeric": 13480,
-            "active": False,
-        },
-    ]
-
+    accounts = MainBankAccount.query.all()
+    transac = Transaction.query.all()
+    
     summary = {
-        "total_balance": "25 430 €",
+        "total_balance": f"{sum(acc.balance for acc in accounts)} {accounts[0].monnaie if accounts else '€'}",
         "count": len(accounts),
-        "main_bank": "BNP Paribas",
+        "main_bank": "BNP Paribas" if accounts else "N/A",
     }
 
     transactions = [
         {
-            "date": "08/12/2025",
-            "account_label": "Compte courant perso",
-            "description": "Paiement CB Supermarché",
-            "category": "Courses",
-            "amount": "- 84 €",
-            "amount_numeric": -84,
-        },
-        {
-            "date": "05/12/2025",
-            "account_label": "Compte courant perso",
-            "description": "Virement salaire",
-            "category": "Revenu",
-            "amount": "+ 2 300 €",
-            "amount_numeric": 2300,
-        },
-        {
-            "date": "03/12/2025",
-            "account_label": "Livret A",
-            "description": "Transfert vers épargne",
-            "category": "Épargne",
-            "amount": "+ 500 €",
-            "amount_numeric": 500,
-        },
-        {
-            "date": "01/12/2025",
-            "account_label": "Compte joint",
-            "description": "Loyer",
-            "category": "Logement",
-            "amount": "- 950 €",
-            "amount_numeric": -950,
-        },
+            "date": t.date,
+            "account_label": t.account_label,
+            "description": t.description,
+            "category": t.category,
+            "amount": f"{t.amount} €",
+            "amount_numeric": t.amount,   # nombre, pas une liste
+        }
+        for t in transac
     ]
 
     return render_template(
@@ -186,78 +130,57 @@ def comptes_bancaires():
 
 @main_bp.route("/bank-accounts/<int:account_id>")
 def compte_detail(account_id):
+    accounts_query = MainBankAccount.query.all()
+    transactions = Transaction.query.filter_by(account_id=account_id).all()
 
-    # Exemple de comptes simulés (à remplacer par ta base SQL plus tard)
     accounts = {
-        1: {
-            "bank_name": "BNP Paribas",
-            "label": "Compte courant perso",
-            "type": "Compte courant",
-            "currency": "EUR",
-            "iban": "FR7612345678901234567890123",
-            "balance": "3 250 €",
-            "balance_numeric": 3250,
-            "active": True,
-        },
-        2: {
-            "bank_name": "Crédit Agricole",
-            "label": "Livret A",
-            "type": "Épargne",
-            "currency": "EUR",
-            "iban": "FR1298765432109876543210987",
-            "balance": "8 700 €",
-            "balance_numeric": 8700,
-            "active": True,
-        },
-        3: {
-            "bank_name": "Boursorama",
-            "label": "Compte joint",
-            "type": "Compte courant",
-            "currency": "EUR",
-            "iban": "FR9845678901234567890123456",
-            "balance": "13 480 €",
-            "balance_numeric": 13480,
-            "active": False,
+        acc.id: {
+            "id": acc.id,
+            "bank_name": acc.bank_origin,
+            "label": acc.account_name,
+            "type": acc.type_account,
+            "currency": acc.monnaie,
+            "iban": acc.iban,
+            "balance": f"{acc.balance} {acc.monnaie}",
+            "balance_numeric": acc.balance,
+            "active": acc.status,
         }
-    }
+        for acc in accounts_query
+    } 
 
     # Récupère le compte correspondant à l'id
     account = accounts.get(account_id)
 
     if not account:
-        return "Compte introuvable", 404
-
-    # Transactions fictives (à filtrer plus tard par compte_id)
-    transactions = [
-        {"date": "05/12/2025", "description": "Salaire", "amount": "+ 2 300 €", "amount_numeric": 2300},
-        {"date": "06/12/2025", "description": "Restaurant", "amount": "- 42 €", "amount_numeric": -42},
-        {"date": "07/12/2025", "description": "Essence", "amount": "- 65 €", "amount_numeric": -65},
-    ]
+        flash("Compte introuvable", "error")
+        return redirect("/bank-accounts")
 
     return render_template("bank/bank_accounts_detail.html", account=account, transactions=transactions)
 
 @main_bp.route("/bank-accounts/<int:account_id>/operations")
 def compte_operations(account_id):
-
-    # Exemple de comptes simulés (plus tard → SQL)
+    accounts_query = MainBankAccount.query.all()
     accounts = {
-        1: "Compte courant perso",
-        2: "Livret A",
-        3: "Compte joint"
+        acc.id: acc.account_name
+        for acc in accounts_query
     }
 
     account_label = accounts.get(account_id)
 
     if not account_label:
-        return "Compte introuvable", 404
+        flash("Compte introuvable", "error")
+        return redirect("/bank-accounts")
 
-    # Transactions fictives du compte sélectionné
+    transaction_query = Transaction.query.filter_by(account_id=account_id).all()
     operations = [
-        {"date": "08/12/2025", "category": "Courses", "desc": "Supermarché", "amount": "- 84 €", "amount_numeric": -84},
-        {"date": "07/12/2025", "category": "Essence", "desc": "Station Total", "amount": "- 65 €", "amount_numeric": -65},
-        {"date": "05/12/2025", "category": "Revenu", "desc": "Salaire", "amount": "+ 2 300 €", "amount_numeric": 2300},
-        {"date": "03/12/2025", "category": "Épargne", "desc": "Virement Livret A", "amount": "+ 250 €", "amount_numeric": 250},
-        {"date": "01/12/2025", "category": "Abonnement", "desc": "Netflix", "amount": "- 15 €", "amount_numeric": -15},
+        {
+            "date": t.date.strftime("%d/%m/%Y"),
+            "category": t.category,
+            "desc": t.description,
+            "amount": f"{t.amount:+} €",
+            "amount_numeric": t.amount,
+        }
+        for t in transaction_query
     ]
 
     # Résumé
@@ -271,12 +194,11 @@ def compte_operations(account_id):
 
 @main_bp.route("/depenses/ajouter", methods=["GET", "POST"])
 def ajouter_depense():
+    accounts_query = MainBankAccount.query.all()
 
-    # Exemple de comptes (plus tard remplacé par SQLAlchemy)
     accounts = [
-        {"id": 1, "label": "Compte courant perso", "balance": "3 250 €"},
-        {"id": 2, "label": "Livret A", "balance": "8 700 €"},
-        {"id": 3, "label": "Compte joint", "balance": "13 480 €"},
+        {"id": acc.id, "label": acc.account_name, "balance": f"{acc.balance} {acc.monnaie}"}
+        for acc in accounts_query
     ]
 
     if request.method == "POST":
@@ -286,10 +208,76 @@ def ajouter_depense():
         description = request.form.get("description", "")
         account_id = int(request.form["account_id"])
 
-        # Tu pourras enregistrer ici dans la base SQL
-        print("DÉPENSE AJOUTÉE :", amount, category, date, description, account_id)
+        selected_account = MainBankAccount.query.get(account_id)
+
+        if not selected_account:
+            flash("Compte introuvable", "error")
+            return redirect("/depenses/ajouter")
+
+        selected_account.balance -= abs(amount)
+
+        transaction = Transaction(
+            date=datetime.strptime(date, "%Y-%m-%d"),
+            account_label=selected_account.account_name,
+            description=description,
+            category=category,
+            amount=-abs(amount),
+            amount_numeric=-abs(amount),
+            account_id=account_id,
+            user_id=current_user.id
+        )
+
+        db.session.add(transaction)
+        db.session.commit()
 
         flash("Dépense ajoutée avec succès.", "success")
-        return redirect("/depenses/ajouter")
-
+        return redirect("/bank-accounts")
     return render_template("bank/depense.html", accounts=accounts)
+
+@main_bp.route("/bank-accounts/add", methods=["POST"])
+@login_required
+def add_bank_account():
+
+    date = datetime.now()
+    bank_origin = request.form["bank_origin"]
+    account_name = request.form["account_name"]
+    type_account = request.form["type_account"]
+    monnaie = request.form["currency"]
+    blance = float(request.form["balance"])
+    iban = request.form["iban"]
+
+    new_account = MainBankAccount(
+        bank_origin=bank_origin,
+        account_name=account_name,
+        type_account=type_account,
+        monnaie=monnaie,
+        balance=blance,
+        iban=iban,
+        user_id= current_user.id
+    )
+
+    db.session.add(new_account)
+    db.session.commit()
+    flash("Compte bancaire ajouté avec succès.", "success")
+    return redirect("/bank-accounts")
+
+@main_bp.route("/bank-accounts/<int:account_id>/confirm-activation", methods=["POST"])
+def confirm_activation(account_id):
+    account = MainBankAccount.query.get(account_id)
+
+    if not account:
+        flash("Compte introuvable.", "error")
+        return redirect("/bank-accounts")
+    
+    user_code = request.form["user_code"]
+    real_code = request.form["generated_code"]
+
+    if user_code == real_code:
+        account.status = True
+        db.session.commit()
+
+        flash("Le compte a été activé avec succès.", "success")
+    else:
+        flash("Le code entré est incorrect.", "error")
+
+    return redirect(f"/bank-accounts/{account_id}")

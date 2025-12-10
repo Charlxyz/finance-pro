@@ -6,7 +6,7 @@
 
 <div class="max-w-5xl mx-auto px-4 py-10">
 
-    <a href="/comptes-bancaires" class="text-indigo-600 hover:underline text-sm">
+    <a href="/bank-accounts" class="text-indigo-600 hover:underline text-sm">
         ← Retour à mes comptes
     </a>
 
@@ -16,9 +16,7 @@
 
     <!-- INFO COMPTE -->
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6 mb-10">
-
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-
             <div>
                 <p class="text-sm text-gray-500">Banque</p>
                 <p class="text-lg font-semibold text-gray-800">{{ account.bank_name }}</p>
@@ -44,6 +42,13 @@
                     <span class="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-sm">
                         Inactif
                     </span>
+
+                    <button 
+                        data-account-id="{{ account.id }}"
+                        class="mt-6 px-5 py-2 bg-indigo-600 text-white font-semibold rounded-lg shadow hover:bg-indigo-700 transition"
+                        onclick="openActivateModal(this)">
+                        Activer ce compte
+                    </button>
                 {% endif %}
             </div>
 
@@ -60,12 +65,10 @@
                 {{ account.balance }}
             </p>
         </div>
-
     </div>
 
     <!-- HISTORIQUE DES TRANSACTIONS -->
     <div class="bg-white border border-gray-200 rounded-xl shadow-sm p-6">
-
         <h2 class="text-2xl font-semibold text-gray-800 mb-4">
             Dernières transactions
         </h2>
@@ -100,9 +103,102 @@
                 {% endfor %}
             </tbody>
         </table>
-
     </div>
-
 </div>
+
+<!-- MODAL ACTIVATION COMPTE -->
+<div id="activate-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
+        <!-- Bouton fermer -->
+        <button onclick="closeActivateModal()"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">
+            &times;
+        </button>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            Activer ce compte
+        </h2>
+
+        <p class="text-gray-600 mb-6">
+            Ce compte est actuellement inactif.  
+            Voulez-vous l’activer pour pouvoir l’utiliser dans vos opérations financières ?
+        </p>
+
+        <form id="activate-form" action="" method="POST" class="space-y-6">
+            <!-- Option compte principal -->
+            <div class="flex items-center space-x-3">
+                <input type="checkbox" name="set_main" class="h-5 w-5">
+                <label class="text-gray-700">Définir comme compte principal</label>
+            </div>
+
+            <!-- Boutons -->
+            <div class="flex justify-between pt-4">
+                <button type="button" onclick="closeActivateModal()"
+                        class="py-3 px-6 bg-gray-100 border rounded-lg text-gray-700 hover:bg-gray-200 transition">
+                    Annuler
+                </button>
+
+                <button type="button"
+                        onclick="openEmailConfirmModal()"
+                        class="py-3 px-6 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                    Activer le compte
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- MODAL CONFIRMATION PAR MAIL -->
+<div id="email-confirm-modal" class="hidden fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50 p-4">
+    <div class="bg-white w-full max-w-md rounded-2xl shadow-xl p-6 relative">
+        <!-- Bouton fermer -->
+        <button onclick="closeEmailConfirmModal()"
+                class="absolute top-3 right-3 text-gray-500 hover:text-gray-700 text-2xl">
+            &times;
+        </button>
+
+        <h2 class="text-2xl font-bold text-gray-800 mb-4">
+            Vérification de votre email
+        </h2>
+
+        <p class="text-gray-600 mb-4">
+            Un code de confirmation à 6 chiffres vient d’être envoyé à votre adresse email.
+        </p>
+
+        <!-- CODE AFFICHE DANS LA POPUP -->
+        <div class="bg-gray-100 border text-center py-3 rounded-lg mb-6">
+            <p class="text-gray-700">
+                Code fictif : <span id="generated-code" class="font-bold"></span>
+            </p>
+        </div>
+
+        <form action="/bank-accounts/{{ account.id }}/confirm-activation" method="POST" class="space-y-6">
+            <!-- CHAMP DE SAISIE -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1">Entrer le code reçu</label>
+                <input type="text" name="user_code" maxlength="6" required
+                       placeholder="Ex : 123456"
+                       class="w-full px-4 py-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500" />
+            </div>
+
+            <input type="hidden" name="generated_code" id="hidden-generated-code">
+
+            <!-- Boutons -->
+            <div class="flex justify-between pt-4">
+                <button type="button" onclick="closeEmailConfirmModal()"
+                        class="py-3 px-6 bg-gray-100 border rounded-lg text-gray-700 hover:bg-gray-200 transition">
+                    Annuler
+                </button>
+
+                <button type="submit"
+                        class="py-3 px-6 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition">
+                    Confirmer
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/bank-accounts-detail.js') }}"></script>
 
 {% endblock %}

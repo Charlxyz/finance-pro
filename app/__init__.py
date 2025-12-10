@@ -19,5 +19,10 @@ def create_app():
     def page_not_found(e):
         flash("La page que vous recherchez n'existe pas.", 'error')
         return render_template("error/404.html")
+    
+    @app.errorhandler(405)
+    def method_not_allowed(e):
+        flash("Méthode non autorisée pour cette ressource.", 'error')
+        return render_template("error/405.html")
 
     return app
