@@ -7,7 +7,7 @@ from ..extensions import db
 # Création du blueprint
 main_bp = Blueprint("main", __name__)
 
-# Route d'accueil
+# Autres routes
 @main_bp.route("/")
 def home():
     return render_template("home.html")
@@ -273,23 +273,36 @@ def add_bank_account():
 
 @main_bp.route("/bank-accounts/<int:account_id>/confirm-activation", methods=["POST"])
 def confirm_activation(account_id):
-    account = MainBankAccount.query.get(account_id)
+    account = MainBankAccount.query.filter_by(
+        id=account_id,
+        user_id=current_user.id
+    ).first()
 
     if not account:
         flash("Compte introuvable.", "error")
         return redirect("/bank-accounts")
-    
-    user_code = request.form["user_code"]
-    real_code = request.form["generated_code"]
 
-    if user_code == real_code:
-        account.status = True
-        db.session.commit()
+    user_code = request.form.get("user_code", "")
+    real_code = request.form.get("generated_code", "")
+    set_main = request.form.get("set_main")
 
-        flash("Le compte a été activé avec succès.", "success")
-    else:
+    if user_code != real_code:
         flash("Le code entré est incorrect.", "error")
+        return redirect(f"/bank-accounts/{account_id}")
 
+    account.status = True
+
+    if set_main:
+        MainBankAccount.query.filter(
+            MainBankAccount.user_id == current_user.id,
+            MainBankAccount.id != account.id
+        ).update({"main_account": False})
+
+        account.main_account = True
+
+    db.session.commit()
+
+    flash("Le compte a été activé avec succès.", "success")
     return redirect(f"/bank-accounts/{account_id}")
 
 @main_bp.route("/api/get/salary")
@@ -326,9 +339,108 @@ def get_depence():
 
     return { "depence": abs(total_depence) if total_depence else 0.0 }
 
+@main_bp.route("/api/get/depence-3")
+def get_depence_3():
+    today = date.today()
+    start_month = date(today.year, today.month, 1)
+
+    depences = (
+        Transaction.query
+            .filter_by(user_id=current_user.id)
+            .filter(
+                Transaction.date >= start_month,
+                Transaction.date <= today,
+                Transaction.amount < 0
+            )
+            .order_by(Transaction.date.desc())
+            .limit(3)
+            .all()
+    )
+
+    depence_list = [{
+        "description": d.description or "Sans description",
+        "date": d.date.strftime("%d/%m/%Y"),
+        "amount": abs(d.amount)
+    } for d in depences]
+
+    return { "depence_3": depence_list }
+
+@main_bp.route("/api/get/enter-3")
+def get_enter_3():
+    today = date.today()
+    start_month = date(today.year, today.month, 1)
+
+    enter = (
+        Transaction.query
+            .filter_by(user_id=current_user.id)
+            .filter(
+                Transaction.date >= start_month,
+                Transaction.date <= today,
+                Transaction.amount > 0
+            )
+            .order_by(Transaction.date.desc())
+            .limit(3)
+            .all()
+    )
+
+    enter_list = [{
+        "description": d.description or "Sans description",
+        "date": d.date.strftime("%d/%m/%Y"),
+        "amount": abs(d.amount)
+    } for d in enter]
+
+    return { "enter_3": enter_list }
+
 @main_bp.route("/api/get/bank_amount")
 def get_bank_amount():
     accounts = MainBankAccount.query.filter_by(user_id=current_user.id, main_account=1).all()
-    total_amount = sum(acc.balance for acc in accounts)
+    total_amount = sum(acc.balance for acc in accounts) if accounts else 0.0
 
     return { "bank_amount": total_amount }
+
+@main_bp.route("/api/add/depence/<int:account_id>", methods=["POST"])
+def add_depence(account_id):
+    account = MainBankAccount.query.get(account_id)
+    
+    if not account:
+        flash("Compte introuvable.", "error")
+        return {"status": "error"}, 404
+    
+    data = request.get_json()
+    amount = float(data.get("amount", 0))
+    category = data.get("category", "Autre")
+    date_str = data.get("date", "")
+    description = data.get("description", "")
+    date_obj = datetime.strptime(date_str, "%Y-%m-%d") if date_str else datetime.now()
+    account.balance -= abs(amount)
+    
+    transaction = Transaction(
+        date=date_obj,
+        account_label=account.account_name,
+        description=description,
+        category=category,
+        amount=-abs(amount),
+        account_id=account_id,
+        user_id=current_user.id
+    ) 
+
+    db.session.add(transaction)
+    db.session.commit()
+
+    flash("Dépense ajoutée avec succès.", "success")
+    return {"status": "success"}, 200
+
+@main_bp.route("/api/get/accounts")
+def api_get_accounts():
+    accounts_query = MainBankAccount.query.all()
+
+    accounts = [
+        {
+            "id": acc.id,
+            "label": acc.account_name,
+            "balance": f"{acc.balance} {acc.monnaie}"
+        }
+        for acc in accounts_query
+    ]
+
+    return {"success": True, "accounts": accounts}

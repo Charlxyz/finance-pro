@@ -18,23 +18,24 @@ function closeActivateModal() {
 // ===== POPUP EMAIL =====
 
 function openEmailConfirmModal() {
-    closeActivateModal(); // ferme la première popup
+    closeActivateModal();
 
     const modal = document.getElementById("email-confirm-modal");
     modal.classList.remove("hidden");
 
-    // Génération d’un code à 6 chiffres
+    // Génère le code
     const code = Math.floor(100000 + Math.random() * 900000);
 
-    // Affichage du code dans la popup
     document.getElementById("generated-code").textContent = code;
-
-    // Stockage du code dans le champ caché pour Flask
     document.getElementById("hidden-generated-code").value = code;
 
-    // Affichage dans la console (simulateur d'envoi mail)
+    // Ajout : Envoie l’état de la case "compte principal"
+    document.getElementById("hidden-set-main").value =
+        document.getElementById("main_account").checked ? "1" : "";
+
     console.log("CODE DE CONFIRMATION :", code);
 }
+
 
 function closeEmailConfirmModal() {
     document.getElementById("email-confirm-modal").classList.add("hidden");
