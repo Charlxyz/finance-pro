@@ -60,7 +60,6 @@ class Transaction(db.Model):
     description = db.Column(db.String(512), nullable=True)
     category = db.Column(db.String(256), nullable=True)
     amount = db.Column(db.Float, nullable=False, default=0.0)
-    amount_numeric = db.Column(db.Float, nullable=False, default=0.0)
 
     # Relation vers le compte bancaire
     account_id = db.Column(db.Integer, db.ForeignKey('main_bank_account.id'), nullable=False)

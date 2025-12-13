@@ -152,7 +152,7 @@ function addDepence() {
     })
     .then(res => res.json())
     .then(data => {
-        if (data.success) {
+        if (data.status === "success") {
             closeDepencesModal();
             window.location.reload();
         } else {

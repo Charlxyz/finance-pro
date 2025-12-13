@@ -83,10 +83,10 @@
                     <td class="py-3 px-4">{{ t.date }}</td>
                     <td class="py-3 px-4">{{ t.description }}</td>
                     <td class="py-3 px-4 text-right font-semibold
-                        {% if t.amount_numeric >= 0 %}
-                            text-green-600
-                        {% else %}
+                        {% if  t.amount <= 0 %}
                             text-red-600
+                        {% else %}
+                            text-green-600
                         {% endif %}">
                         {{ t.amount }}
                     </td>

@@ -1,4 +1,4 @@
-from datetime import date, datetime
+from datetime import date, datetime, time
 from flask import Blueprint, redirect, render_template, request, flash
 from flask_login import current_user, login_required, logout_user
 from ..models import User, MainBankAccount, Transaction
@@ -342,14 +342,16 @@ def get_depence():
 @main_bp.route("/api/get/depence-3")
 def get_depence_3():
     today = date.today()
-    start_month = date(today.year, today.month, 1)
+
+    start_month = datetime.combine(date(today.year, today.month, 1), time.min)
+    end_today = datetime.combine(today, time.max)
 
     depences = (
         Transaction.query
             .filter_by(user_id=current_user.id)
             .filter(
                 Transaction.date >= start_month,
-                Transaction.date <= today,
+                Transaction.date <= end_today,
                 Transaction.amount < 0
             )
             .order_by(Transaction.date.desc())
@@ -363,7 +365,8 @@ def get_depence_3():
         "amount": abs(d.amount)
     } for d in depences]
 
-    return { "depence_3": depence_list }
+    return {"depence_3": depence_list}
+
 
 @main_bp.route("/api/get/enter-3")
 def get_enter_3():
@@ -444,3 +447,36 @@ def api_get_accounts():
     ]
 
     return {"success": True, "accounts": accounts}
+
+@main_bp.route("/api/post/add_depence", methods=["POST"])
+def add_depence_api():
+    data = request.get_json()
+
+    account_id = int(data.get("account_id"))
+    amount = float(data.get("amount"))
+    category = data.get("category")
+    date_str = data.get("date")
+    description = data.get("description", "")
+
+    account = MainBankAccount.query.get(account_id)
+
+    if not account:
+        return {"status": "error", "message": "Compte introuvable."}, 404
+
+    account.balance -= abs(amount)
+
+    transaction = Transaction(
+        date=datetime.strptime(date_str, "%Y-%m-%d"),
+        account_label=account.account_name,
+        description=description,
+        category=category,
+        amount=-abs(amount),
+        account_id=account_id,
+        user_id=current_user.id
+    )
+
+    db.session.add(transaction)
+    db.session.commit()
+
+    flash("Dépense ajoutée avec succès.", "success")
+    return {"status": "success"}, 200
